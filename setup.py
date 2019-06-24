@@ -4,7 +4,7 @@ setup(
     name='timeconverter',
     version='1.0.0',
     packages=['timeconverter'],
-    url='https://github.com/Kryvonis/scheduledtask',
+    url='https://github.com/Kryvonis/timeconverter',
     license='MIT',
     author='Artem Kryvonis',
     author_email='me@kryvonis.com',
