@@ -160,7 +160,7 @@ class ScheduledTask:
             if datetimeholder.day > n_days_in_month:
                 return False
 
-        # Check if day of week number exceeds number of day of weeks for 
+        # Check if day of week number exceeds number of day of weeks for
         # this month
         if self.strategy == TaskStrategy.days_of_week_num and fraction == \
                 self.fractions.day_of_week_num:
@@ -199,6 +199,8 @@ class ScheduledTask:
                                           datetimeholder.day_of_week)
             n_days_in_month = num_days_in_month(datetimeholder.year,
                                                 datetimeholder.month)
+            if day is None:
+                return False
             if day > n_days_in_month:
                 return False
 
@@ -207,9 +209,9 @@ class ScheduledTask:
 
     def _datetimeholders_equal(self, a: DateTimeHolder, b: DateTimeHolder,
                                from_fraction: Enum):
-        """Partially check a and b date time holders for equality, starting 
+        """Partially check a and b date time holders for equality, starting
         with fraction.
-           For example, if the fraction is DAY, compare only DAY, MONTH and 
+           For example, if the fraction is DAY, compare only DAY, MONTH and
            YEAR
         """
         return all(
@@ -219,7 +221,7 @@ class ScheduledTask:
     def _datetimeholders_compare(self, a: DateTimeHolder, b: DateTimeHolder,
                                  from_fraction: Enum):
         """Partially compare a and b date time holders, starting with fraction.
-           For example, if the fraction is DAY, compare only DAY, MONTH and 
+           For example, if the fraction is DAY, compare only DAY, MONTH and
            YEAR
         """
         _a = DateTimeHolder()
@@ -242,7 +244,7 @@ class ScheduledTask:
         :param result:Value to increase
         :param fraction:Fraction to increase
         :param current:Original value - used to reset if we can't increase
-        :return:Number of fractions increased (to know from which to 
+        :return:Number of fractions increased (to know from which to
         recalculate)
         """
         # If candidates are range, perform step-aware increment
@@ -257,13 +259,15 @@ class ScheduledTask:
         datetimeholder_increased = copy(result)
         datetimeholder_increased[fraction.name] = new_value
         if increment > 0:  # 1
-            in_range = get_smallest_value_greater_or_equal_to(
+            new_value = get_smallest_value_greater_or_equal_to(
                 self.candidates[fraction.value],
-                datetimeholder_increased[fraction.name]) is not None
+                datetimeholder_increased[fraction.name])
+            in_range = new_value is not None
         else:  # -1
-            in_range = get_biggest_value_less_or_equal_to(
+            new_value = get_biggest_value_less_or_equal_to(
                 self.candidates[fraction.value],
-                datetimeholder_increased[fraction.name]) is not None
+                datetimeholder_increased[fraction.name])
+            in_range = new_value is not None
 
         if self._datetimeholder_valid(datetimeholder_increased,
                                       fraction) and in_range:
@@ -272,7 +276,7 @@ class ScheduledTask:
         else:
             if fraction == self.highest_fraction:
                 raise ValueError(
-                    "Can't increase fraction - current " + 
+                    "Can't increase fraction - current " +
                     self.highest_fraction +
                     " is " + result[fraction.value])
             result[fraction.name] = current[fraction.name]
@@ -375,13 +379,13 @@ class ScheduledTask:
             if result[fraction.name] is None \
                     or not self._datetimeholder_valid(result, fraction) \
                     or not self._datetimeholders_compare(result, current,
-                                                         fraction) > -1:  # 
+                                                         fraction) > -1:  #
                 # In case with day_of_week_num
                 if fraction == self.highest_fraction:
-                    return None  # Can't find highest fraction match, 
+                    return None  # Can't find highest fraction match,
                     # event never happened in the past
 
-                # Decrease higher fractions on result datetime, recalculate 
+                # Decrease higher fractions on result datetime, recalculate
                 # starting from that fraction-1
                 fraction_value += self._increase_fraction(result,
                                                           self.fractions(
@@ -425,11 +429,11 @@ class ScheduledTask:
                     or not self._datetimeholders_compare(
                 result, current, fraction) < 1:  # In case with day_of_week_num
                 if fraction == self.highest_fraction:
-                    return None  
+                    return None
                     # Can't find highest fraction match,
                     #  event never happened in the past
 
-                # Decrease higher fractions on result datetime, 
+                # Decrease higher fractions on result datetime,
                 # recalculate starting from that fraction-1
                 fraction_value += self._increase_fraction(
                     result, self.fractions(
